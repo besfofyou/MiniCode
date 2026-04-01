@@ -64,7 +64,14 @@ async function main(): Promise<void> {
       return
     }
 
-    console.log(renderBanner(runtime, process.cwd(), permissions.getSummary()))
+    console.log(
+      renderBanner(runtime, process.cwd(), permissions.getSummary(), {
+        transcriptCount: 0,
+        messageCount: messages.length,
+        skillCount: tools.getSkills().length,
+        mcpCount: tools.getMcpServers().length,
+      }),
+    )
     console.log('')
 
     const rl = readline.createInterface({

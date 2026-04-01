@@ -11,72 +11,240 @@ const GREEN = '\u001b[32m'
 const YELLOW = '\u001b[33m'
 const RED = '\u001b[31m'
 const BLUE = '\u001b[34m'
+const MAGENTA = '\u001b[35m'
 const BOLD = '\u001b[1m'
 const REVERSE = '\u001b[7m'
 const BRIGHT_GREEN = '\u001b[92m'
 const BRIGHT_RED = '\u001b[91m'
+const BRIGHT_CYAN = '\u001b[96m'
+const BRIGHT_YELLOW = '\u001b[93m'
+const BORDER = '\u001b[38;5;31m'
 
 function stripAnsi(input: string): string {
   return input.replace(/\u001b\[[0-9;]*m/g, '')
 }
 
+function charDisplayWidth(char: string): number {
+  const code = char.codePointAt(0)
+  if (code === undefined) return 0
+
+  if (
+    code >= 0x1100 &&
+    (
+      code <= 0x115f ||
+      code === 0x2329 ||
+      code === 0x232a ||
+      (code >= 0x2e80 && code <= 0xa4cf && code !== 0x303f) ||
+      (code >= 0xac00 && code <= 0xd7a3) ||
+      (code >= 0xf900 && code <= 0xfaff) ||
+      (code >= 0xfe10 && code <= 0xfe19) ||
+      (code >= 0xfe30 && code <= 0xfe6f) ||
+      (code >= 0xff00 && code <= 0xff60) ||
+      (code >= 0xffe0 && code <= 0xffe6) ||
+      (code >= 0x1f300 && code <= 0x1faf6) ||
+      (code >= 0x20000 && code <= 0x3fffd)
+    )
+  ) {
+    return 2
+  }
+
+  return 1
+}
+
+function stringDisplayWidth(input: string): number {
+  return [...stripAnsi(input)].reduce((sum, char) => sum + charDisplayWidth(char), 0)
+}
+
 function truncatePlain(input: string, width: number): string {
   if (width <= 0) return ''
-  if (input.length <= width) return input
+  if (stringDisplayWidth(input) <= width) return input
   if (width <= 3) return input.slice(0, width)
-  return `${input.slice(0, width - 3)}...`
+  const target = width - 3
+  let current = ''
+  let used = 0
+  for (const char of [...input]) {
+    const next = charDisplayWidth(char)
+    if (used + next > target) break
+    current += char
+    used += next
+  }
+  return `${current}...`
 }
 
 function padPlain(input: string, width: number): string {
-  const visible = stripAnsi(input).length
+  const visible = stringDisplayWidth(input)
   return visible >= width ? input : `${input}${' '.repeat(width - visible)}`
 }
 
 function truncatePathMiddle(input: string, width: number): string {
-  if (width <= 0 || input.length <= width) return input
+  if (width <= 0 || stringDisplayWidth(input) <= width) return input
   if (width <= 5) return truncatePlain(input, width)
 
   const keep = width - 3
-  const left = Math.ceil(keep / 2)
-  const right = Math.floor(keep / 2)
-  return `${input.slice(0, left)}...${input.slice(input.length - right)}`
+  const leftTarget = Math.ceil(keep / 2)
+  const rightTarget = Math.floor(keep / 2)
+
+  let left = ''
+  let leftWidth = 0
+  for (const char of [...input]) {
+    const next = charDisplayWidth(char)
+    if (leftWidth + next > leftTarget) break
+    left += char
+    leftWidth += next
+  }
+
+  let right = ''
+  let rightWidth = 0
+  for (const char of [...input].reverse()) {
+    const next = charDisplayWidth(char)
+    if (rightWidth + next > rightTarget) break
+    right = `${char}${right}`
+    rightWidth += next
+  }
+
+  return `${left}...${right}`
+}
+
+function colorBadge(
+  label: string,
+  value: string,
+  color: string,
+): string {
+  return `${color}[${label}]${RESET} ${BOLD}${value}${RESET}`
+}
+
+function borderLine(kind: 'top' | 'bottom', width: number): string {
+  const inner = Math.max(0, width - 2)
+  if (kind === 'top') {
+    return `${BORDER}╭${'─'.repeat(inner)}╮${RESET}`
+  }
+  return `${BORDER}╰${'─'.repeat(inner)}╯${RESET}`
+}
+
+function panelRow(left: string, width: number, right?: string): string {
+  const inner = Math.max(0, width - 4)
+  const rightText = right ?? ''
+  const leftWidth = stringDisplayWidth(left)
+  const rightWidth = stringDisplayWidth(rightText)
+  const gap = Math.max(1, inner - leftWidth - rightWidth)
+  const leftText =
+    leftWidth + rightWidth + gap > inner
+      ? truncatePlain(left, Math.max(0, inner - rightWidth - 1))
+      : left
+  return `${BORDER}│${RESET} ${leftText}${' '.repeat(
+    Math.max(0, inner - stringDisplayWidth(leftText) - rightWidth),
+  )}${rightText} ${BORDER}│${RESET}`
+}
+
+function emptyPanelRow(width: number): string {
+  return `${BORDER}│${RESET}${' '.repeat(Math.max(0, width - 2))}${BORDER}│${RESET}`
+}
+
+function wrapPanelBodyLine(line: string, width: number): string[] {
+  const inner = Math.max(0, width - 4)
+  if (inner <= 0) return ['']
+  const plain = stripAnsi(line)
+  if (stringDisplayWidth(plain) <= inner) return [line]
+  const parts: string[] = []
+  let current = ''
+  let currentWidth = 0
+  for (const char of [...plain]) {
+    const charWidth = charDisplayWidth(char)
+    if (currentWidth + charWidth > inner) {
+      parts.push(current)
+      current = char
+      currentWidth = charWidth
+      continue
+    }
+    current += char
+    currentWidth += charWidth
+  }
+  if (current.length > 0) {
+    parts.push(current)
+  }
+  return parts
+}
+
+export function renderPanel(
+  title: string,
+  body: string,
+  options: {
+    rightTitle?: string
+    minBodyLines?: number
+  } = {},
+): string {
+  const width = Math.max(60, process.stdout.columns ?? 100)
+  const bodyLines = body.length > 0 ? body.split('\n') : []
+  const renderedLines = bodyLines.flatMap(line => wrapPanelBodyLine(line, width))
+  const minBodyLines = options.minBodyLines ?? 0
+  while (renderedLines.length < minBodyLines) {
+    renderedLines.push('')
+  }
+
+  return [
+    borderLine('top', width),
+    panelRow(
+      `${BRIGHT_CYAN}${BOLD}${title}${RESET}`,
+      width,
+      options.rightTitle
+        ? `${DIM}${truncatePlain(options.rightTitle, Math.max(10, Math.floor(width * 0.3)))}${RESET}`
+        : undefined,
+    ),
+    emptyPanelRow(width),
+    ...renderedLines.map(line => panelRow(line, width)),
+    borderLine('bottom', width),
+  ].join('\n')
 }
 
 export function renderBanner(
   runtime: RuntimeConfig | null,
   cwd: string,
   permissionSummary: string[],
+  session: {
+    transcriptCount: number
+    messageCount: number
+    skillCount: number
+    mcpCount: number
+  },
 ): string {
-  const columns = Math.max(60, process.stdout.columns ?? 100)
   const cwdName = path.basename(cwd) || cwd
   const model = runtime?.model ?? 'not-configured'
-  const left = `${BOLD}MiniCode${RESET} ${DIM}coding agent${RESET}`
-  const right = `${DIM}${truncatePlain(model, Math.max(14, Math.floor(columns * 0.26)))}${RESET}`
-  const gap = Math.max(2, columns - stripAnsi(left).length - stripAnsi(right).length)
-  const topLine = `${left}${' '.repeat(gap)}${right}`
-  const projectLine = `${BLUE}${BOLD}${truncatePlain(cwdName, 24)}${RESET} ${DIM}${truncatePathMiddle(
-    cwd,
-    Math.max(24, columns - cwdName.length - 6),
-  )}${RESET}`
-
+  const provider = runtime?.baseUrl
+    ? runtime.baseUrl.replace(/^https?:\/\//, '').split('/')[0] || 'custom'
+    : 'offline'
+  const projectLine = `${BLUE}${BOLD}${truncatePlain(cwdName, 24)}${RESET} ${DIM}${truncatePathMiddle(cwd, 72)}${RESET}`
   const permissionLine =
     permissionSummary.length > 0
-      ? `${DIM}${truncatePlain(permissionSummary.join(' | '), columns)}${RESET}`
+      ? `${DIM}${truncatePlain(permissionSummary.join(' | '), 96)}${RESET}`
       : `${DIM}permissions: ask on sensitive actions${RESET}`
+  const metaLine = [
+    colorBadge('session', 'local', BRIGHT_YELLOW),
+    colorBadge('provider', provider, CYAN),
+    colorBadge('model', model, GREEN),
+    colorBadge('messages', String(session.messageCount), BRIGHT_CYAN),
+    colorBadge('events', String(session.transcriptCount), BLUE),
+    colorBadge('skills', String(session.skillCount), BRIGHT_GREEN),
+    colorBadge('mcp', String(session.mcpCount), MAGENTA),
+  ].join('  ')
 
-  return [
-    `${CYAN}${'='.repeat(columns)}${RESET}`,
-    topLine,
-    `${GREEN}cwd${RESET} ${projectLine}`,
-    `${YELLOW}tips${RESET} ${DIM}/ opens commands | Up/Down history | Alt+Up/Down or PgUp/PgDn scroll${RESET}`,
-    permissionLine,
-    `${CYAN}${'-'.repeat(columns)}${RESET}`,
-  ].join('\n')
+  return renderPanel(
+    'MiniCode',
+    [
+      `${DIM}Terminal coding assistant with a card-style session layout.${RESET}`,
+      '',
+      projectLine,
+      metaLine,
+      permissionLine,
+    ].join('\n'),
+    {
+      rightTitle: provider,
+    },
+  )
 }
 
 export function renderStatusLine(status: string | null): string {
-  if (!status) return `${DIM}idle${RESET}`
-  return `${YELLOW}status${RESET} ${status}`
+  if (!status) return `${DIM}Ready${RESET}`
+  return `${YELLOW}${BOLD}${status}${RESET}`
 }
 
 export function renderToolPanel(
@@ -100,6 +268,18 @@ export function renderToolPanel(
   }
 
   return `${DIM}tools${RESET}  ${items.join('  ')}`
+}
+
+export function renderFooterBar(
+  status: string | null,
+  toolsEnabled: boolean,
+  skillsEnabled: boolean,
+): string {
+  const width = Math.max(60, process.stdout.columns ?? 100)
+  const left = renderStatusLine(status)
+  const right = `${DIM}tools${RESET} ${toolsEnabled ? `${GREEN}on${RESET}` : `${RED}off${RESET}`} ${DIM}|${RESET} ${DIM}skills${RESET} ${skillsEnabled ? `${GREEN}on${RESET}` : `${RED}off${RESET}`}`
+  const gap = Math.max(1, width - stripAnsi(left).length - stripAnsi(right).length)
+  return `${left}${' '.repeat(gap)}${right}`
 }
 
 export function renderSlashMenu(
