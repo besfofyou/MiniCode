@@ -360,7 +360,11 @@ MiniCode 当前主要支持：
 
 ## Star 趋势
 
-[![Star History Chart](https://api.star-history.com/svg?repos=LiuMengxuan04/MiniCode&type=Date)](https://www.star-history.com/#LiuMengxuan04/MiniCode&Date)
+<p align="center">
+  <a href="https://starchart.cc/LiuMengxuan04/MiniCode">
+    <img src="https://starchart.cc/LiuMengxuan04/MiniCode.svg" alt="Stargazers over time" />
+  </a>
+</p>
 
 ## 通过 MiniCode 学习 Claude Code 设计
 
