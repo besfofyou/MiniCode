@@ -1,0 +1,3 @@
+[submodule "external/MiniCode-rs"]
+	path = external/MiniCode-rs
+	url = git@github.com:harkerhand/MiniCode-rs.git
