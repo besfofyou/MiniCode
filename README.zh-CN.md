@@ -1,6 +1,6 @@
 # MiniCode
 
-[English](./README.md) | [架构说明](./ARCHITECTURE_ZH.md) | [通过 MiniCode 学习 Claude Code 设计](./CLAUDE_CODE_PATTERNS_ZH.md) | [License](./LICENSE)
+[English](./README.md) | [架构说明](./ARCHITECTURE_ZH.md) | [贡献规范](./CONTRIBUTING_ZH.md) | [通过 MiniCode 学习 Claude Code 设计](./CLAUDE_CODE_PATTERNS_ZH.md) | [License](./LICENSE)
 
 一个面向本地开发工作流的轻量级终端编码助手。
 
@@ -30,6 +30,7 @@ MiniCode 围绕一个实用的 terminal-first agent loop 构建：
 - [Star 趋势](#star-趋势)
 - [项目结构](#项目结构)
 - [架构文档](#架构文档)
+- [贡献规范](#贡献规范)
 - [通过 MiniCode 学习 Claude Code 设计](#通过-minicode-学习-claude-code-设计)
 - [开发说明](#开发说明)
 
@@ -392,6 +393,11 @@ MiniCode 当前主要支持：
 
 - [Architecture Overview](./ARCHITECTURE.md)
 - [中文架构说明](./ARCHITECTURE_ZH.md)
+
+## 贡献规范
+
+- [中文贡献规范](./CONTRIBUTING_ZH.md)
+- [Contribution Guidelines](./CONTRIBUTING.md)
 
 ## 开发说明
 
