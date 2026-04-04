@@ -72,6 +72,7 @@ MiniCode is a good fit if you want:
 - `patch_file`
 - `modify_file`
 - `run_command`
+- `ask_user`
 - `load_skill`
 - `list_mcp_resources`
 - `read_mcp_resource`

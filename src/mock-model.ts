@@ -58,7 +58,7 @@ export class MockModelAdapter implements ModelAdapter {
     if (userText === '/tools') {
       return {
         type: 'assistant',
-        content: '可用工具：list_files, grep_files, read_file, write_file, edit_file, run_command',
+        content: '可用工具：ask_user, list_files, grep_files, read_file, write_file, edit_file, run_command',
       }
     }
 

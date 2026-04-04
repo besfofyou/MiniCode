@@ -72,6 +72,7 @@ MiniCode 围绕一个实用的 terminal-first agent loop 构建：
 - `patch_file`
 - `modify_file`
 - `run_command`
+- `ask_user`
 - `load_skill`
 - `list_mcp_resources`
 - `read_mcp_resource`

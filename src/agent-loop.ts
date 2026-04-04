@@ -2,51 +2,6 @@ import type { ToolRegistry } from './tool.js'
 import type { ChatMessage, ModelAdapter } from './types.js'
 import type { PermissionManager } from './permissions.js'
 
-function looksLikeClarifyingQuestion(content: string): boolean {
-  const trimmed = content.trim()
-  if (!trimmed) return false
-
-  const lower = trimmed.toLowerCase()
-  const hasQuestionMark = /[?？]/.test(trimmed)
-  const asksForDecision =
-    /请(?:你|您)?(?:确认|选择|决定|告知|说明|回复)|是否|要不要|可否|行吗|可以吗|你(?:希望|想要)|您(?:希望|想要)|请选择|请告诉我/.test(
-      trimmed,
-    ) ||
-    /would you|do you|which|what would you like|prefer|want|choose|confirm|decide|please provide|let me know/.test(
-      lower,
-    )
-  const asksForMissingInfo =
-    /请(?:提供|补充)|需要你|还需要|缺少|未提供|告诉我/.test(trimmed) ||
-    /provide|share|clarify|missing|need your|tell me/.test(lower)
-
-  if (asksForDecision || asksForMissingInfo) {
-    return true
-  }
-
-  if (!hasQuestionMark) {
-    return false
-  }
-
-  const userAddressingHints = [
-    '你',
-    '您',
-    'would you',
-    'do you',
-    'which',
-    'what',
-    'prefer',
-    'want',
-    'choose',
-    'confirm',
-    'user',
-    'your',
-  ]
-
-  return userAddressingHints.some(
-    hint => lower.includes(hint) || trimmed.includes(hint),
-  )
-}
-
 function isEmptyAssistantResponse(content: string): boolean {
   return content.trim().length === 0
 }
@@ -68,11 +23,7 @@ function shouldTreatAssistantAsProgress(args: {
     return false
   }
 
-  if (looksLikeClarifyingQuestion(args.content)) {
-    return false
-  }
-
-  return args.content.trim().length > 0
+  return false
 }
 
 function formatDiagnostics(args: {
@@ -244,14 +195,6 @@ export async function runAgentTurn(args: {
       return withAssistant
     }
 
-    if (next.content && looksLikeClarifyingQuestion(next.content)) {
-      args.onAssistantMessage?.(next.content)
-      return [
-        ...messages,
-        { role: 'assistant', content: next.content },
-      ]
-    }
-
     if (next.content) {
       if (next.contentKind === 'progress') {
         args.onProgressMessage?.(next.content)
@@ -269,6 +212,10 @@ export async function runAgentTurn(args: {
           { role: 'assistant', content: next.content },
         ]
       }
+    }
+
+    if ((next.calls?.length ?? 0) === 0 && next.content && next.contentKind !== 'progress') {
+      return messages
     }
 
     for (const call of next.calls) {
@@ -296,10 +243,25 @@ export async function runAgentTurn(args: {
           role: 'tool_result',
           toolUseId: call.id,
           toolName: call.toolName,
-          content: result.ok ? result.output : result.output,
+          content: result.output,
           isError: !result.ok,
         },
       ]
+
+      if (result.awaitUser) {
+        const question = result.output.trim()
+        if (question.length > 0) {
+          args.onAssistantMessage?.(question)
+          messages = [
+            ...messages,
+            {
+              role: 'assistant',
+              content: question,
+            },
+          ]
+        }
+        return messages
+      }
     }
   }
 

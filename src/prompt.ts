@@ -31,15 +31,16 @@ export async function buildSystemPrompt(
     'You can inspect or modify paths outside the current cwd when the user asks, but tool permissions may pause for approval first.',
     'When making code changes, keep them minimal, practical, and working-oriented.',
     'If the user clearly asked you to build, modify, optimize, or generate something, do the work instead of stopping at a plan.',
-    'If a missing preference would materially change the result, ask one concise follow-up question and wait. Do not choose subjective preferences such as colors, visual style, copy tone, or naming unless the user explicitly told you to decide yourself.',
+    'If you need user clarification, call the ask_user tool with one concise question and wait for the user reply. Do not ask clarifying questions as plain assistant text.',
+    'Do not choose subjective preferences such as colors, visual style, copy tone, or naming unless the user explicitly told you to decide yourself.',
     'When using read_file, pay attention to the header fields. If it says TRUNCATED: yes, continue reading with a larger offset before concluding that the file itself is cut off.',
     'If the user names a skill or clearly asks for a workflow that matches a listed skill, call load_skill before following it.',
     'Structured response protocol:',
     '- When you are still working and will continue with more tool calls, start your text with <progress>.',
     '- Only when the task is actually complete and you are ready to hand control back, start your text with <final>.',
-    '- If you ask the user a clarifying question, ask it directly instead of using <final>.',
+    '- Use ask_user when clarification is required; that tool ends the turn and waits for user input.',
     '- Do not stop after a progress update. After a <progress> message, continue the task in the next step.',
-    '- After you have used any tool in the current turn, any plain status update without <final> may be treated as progress and the agent may continue automatically.',
+    '- Plain assistant text without <progress> is treated as a completed assistant message for this turn.',
   ]
 
   if (permissionSummary.length > 0) {

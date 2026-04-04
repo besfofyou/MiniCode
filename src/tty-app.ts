@@ -895,6 +895,7 @@ export async function runTtyApp(args: TtyAppArgs): Promise<void> {
     let finished = false
     let inputRemainder = ''
     let eventChain = Promise.resolve()
+    let submitInFlight = false
 
     const cleanup = () => {
       process.stdin.off('data', onData)
@@ -923,6 +924,11 @@ export async function runTtyApp(args: TtyAppArgs): Promise<void> {
             if (togglePendingApprovalExpand(state)) {
               renderScreen(permissionArgs, state)
             }
+            return
+          }
+
+          if (event.kind === 'text' && event.ctrl && event.text === 'c') {
+            finish()
             return
           }
 
@@ -990,6 +996,27 @@ export async function runTtyApp(args: TtyAppArgs): Promise<void> {
 
           if (event.kind === 'text' && !event.ctrl && !event.meta) {
             const pending = state.pendingApproval
+            if (!pending.feedbackMode) {
+              const pressed = event.text.trim().toLowerCase()
+              const matched = pending.request.choices.find(
+                choice => choice.key.toLowerCase() === pressed,
+              )
+              if (matched) {
+                if (matched.decision === 'deny_with_feedback') {
+                  pending.feedbackMode = true
+                  pending.feedbackInput = ''
+                  renderScreen(permissionArgs, state)
+                  return
+                }
+
+                state.pendingApproval = null
+                state.status = null
+                pending.resolve({ decision: matched.decision })
+                renderScreen(permissionArgs, state)
+                return
+              }
+            }
+
             if (pending.feedbackMode) {
               pending.feedbackInput += event.text
               renderScreen(permissionArgs, state)
@@ -1101,17 +1128,37 @@ export async function runTtyApp(args: TtyAppArgs): Promise<void> {
           state.cursorOffset = 0
           state.selectedSlashIndex = 0
           renderScreen(permissionArgs, state)
-          const shouldExit = await handleInput(
-            permissionArgs,
-            state,
-            () => renderScreen(permissionArgs, state),
-            submittedInput,
-          )
-          if (shouldExit) {
-            finish()
+          if (submitInFlight) {
             return
           }
-          renderScreen(permissionArgs, state)
+          submitInFlight = true
+          void (async () => {
+            try {
+              const shouldExit = await handleInput(
+                permissionArgs,
+                state,
+                () => renderScreen(permissionArgs, state),
+                submittedInput,
+              )
+              if (shouldExit) {
+                finish()
+                return
+              }
+              renderScreen(permissionArgs, state)
+            } catch (error) {
+              pushTranscriptEntry(state, {
+                kind: 'assistant',
+                body: error instanceof Error ? error.message : String(error),
+              })
+              state.input = ''
+              state.cursorOffset = 0
+              state.selectedSlashIndex = 0
+              state.status = null
+              renderScreen(permissionArgs, state)
+            } finally {
+              submitInFlight = false
+            }
+          })()
           return
         }
 

@@ -21,6 +21,7 @@ export type ToolResult = {
   ok: boolean
   output: string
   backgroundTask?: BackgroundTaskResult
+  awaitUser?: boolean
 }
 
 export type ToolDefinition<TInput> = {
