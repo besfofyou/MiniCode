@@ -20,6 +20,7 @@ The project is intentionally compact, so the control flow, tool model, and TUI b
 
 ## Table of Contents
 
+- [Product Showcase Page](#product-showcase-page)
 - [Why MiniCode](#why-minicode)
 - [Features](#features)
 - [Installation](#installation)
@@ -34,6 +35,11 @@ The project is intentionally compact, so the control flow, tool model, and TUI b
 - [Roadmap](#roadmap)
 - [Learn Claude Code Design Through MiniCode](#learn-claude-code-design-through-minicode)
 - [Development](#development)
+
+## Product Showcase Page
+
+- Open [docs/index.html](./docs/index.html) in a browser for a visual product overview.
+- GitHub Pages (recommended): `https://liumengxuan04.github.io/MiniCode/`
 
 ## Why MiniCode
 

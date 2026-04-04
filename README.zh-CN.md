@@ -20,6 +20,7 @@ MiniCode 围绕一个实用的 terminal-first agent loop 构建：
 
 ## 目录
 
+- [产品介绍展示页](#产品介绍展示页)
 - [为什么选择 MiniCode](#为什么选择-minicode)
 - [功能特性](#功能特性)
 - [安装](#安装)
@@ -34,6 +35,11 @@ MiniCode 围绕一个实用的 terminal-first agent loop 构建：
 - [路线图](#路线图)
 - [通过 MiniCode 学习 Claude Code 设计](#通过-minicode-学习-claude-code-设计)
 - [开发说明](#开发说明)
+
+## 产品介绍展示页
+
+- 在浏览器中打开 [docs/index.html](./docs/index.html)，即可查看可视化产品介绍页面。
+- GitHub Pages 推荐访问地址：`https://liumengxuan04.github.io/MiniCode/`
 
 ## 为什么选择 MiniCode
 

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MiniCode | 产品介绍</title>
+    <meta
+      name="description"
+      content="MiniCode 是一个轻量、terminal-first 的本地编码助手，支持工具调用、审阅后写入、Skills 与 MCP 扩展。"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap");
+
+      :root {
+        --bg: #f7f4ee;
+        --ink: #161616;
+        --muted: #5f5f5f;
+        --card: rgba(255, 255, 255, 0.78);
+        --accent: #ff5a36;
+        --accent-2: #1c8a6b;
+        --line: rgba(22, 22, 22, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 10% -10%, #ffd9b7 0%, transparent 35%),
+          radial-gradient(circle at 90% 10%, #d5f4ea 0%, transparent 30%),
+          linear-gradient(160deg, #f7f4ee 0%, #f1ebdf 100%);
+        font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+        line-height: 1.6;
+      }
+
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 36px;
+      }
+
+      .brand {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.4rem;
+        letter-spacing: 0.02em;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 12px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.65);
+        font-size: 0.85rem;
+      }
+
+      .hero {
+        background: var(--card);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 26px;
+        padding: 52px 42px;
+        box-shadow: 0 20px 50px rgba(30, 20, 10, 0.08);
+        animation: rise 900ms ease both;
+      }
+
+      .hero h1 {
+        margin: 0 0 16px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: clamp(2.2rem, 5vw, 4rem);
+        line-height: 1.05;
+      }
+
+      .hero p {
+        max-width: 760px;
+        margin: 0;
+        font-size: 1.08rem;
+        color: #2f2f2f;
+      }
+
+      .hero-actions {
+        margin-top: 28px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .btn {
+        border: 1px solid transparent;
+        border-radius: 14px;
+        padding: 12px 18px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: 220ms ease;
+      }
+
+      .btn-primary {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: #000;
+        transform: translateY(-2px);
+      }
+
+      .btn-ghost {
+        border-color: var(--line);
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.65);
+      }
+
+      .btn-ghost:hover {
+        border-color: var(--ink);
+        transform: translateY(-2px);
+      }
+
+      .stats {
+        margin-top: 34px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.65);
+        padding: 14px;
+      }
+
+      .stat strong {
+        display: block;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.4rem;
+      }
+
+      section {
+        margin-top: 52px;
+      }
+
+      h2 {
+        font-family: "Space Grotesk", sans-serif;
+        margin: 0 0 14px;
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+      }
+
+      .section-intro {
+        margin: 0 0 20px;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 22px;
+        background: var(--card);
+        backdrop-filter: blur(3px);
+        box-shadow: 0 8px 22px rgba(30, 20, 10, 0.05);
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 1.08rem;
+      }
+
+      .card p {
+        margin: 0;
+        color: #343434;
+      }
+
+      .workflow {
+        display: grid;
+        gap: 12px;
+      }
+
+      .step {
+        border-left: 4px solid var(--accent);
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.75);
+        border-radius: 12px;
+      }
+
+      .step:nth-child(2) {
+        border-left-color: #ff944d;
+      }
+
+      .step:nth-child(3) {
+        border-left-color: #1c8a6b;
+      }
+
+      .step:nth-child(4) {
+        border-left-color: #4677ff;
+      }
+
+      .cta {
+        margin-top: 56px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 24px;
+        background: linear-gradient(120deg, rgba(255, 90, 54, 0.08), rgba(28, 138, 107, 0.08));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .cta p {
+        margin: 0;
+        color: #343434;
+      }
+
+      footer {
+        margin: 44px 0 20px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      @media (max-width: 900px) {
+        .stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .cta {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .hero {
+          padding: 34px 22px;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand">MiniCode</div>
+        <span class="badge">terminal-first coding assistant</span>
+      </div>
+
+      <header class="hero">
+        <h1>用更小体量，跑通完整 AI 编码工作流</h1>
+        <p>
+          MiniCode 是一个面向本地开发的轻量级终端编码助手。它保留了 model-tool
+          闭环、审批式文件修改、可扩展工具协议等关键能力，同时保持代码结构清晰，适合学习、改造与二次开发。
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.zh-CN.md">查看中文文档</a>
+          <a class="btn btn-ghost" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.md">Read in English</a>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <strong>13+</strong>
+            内置工具
+          </div>
+          <div class="stat">
+            <strong>1 个</strong>
+            主 agent loop
+          </div>
+          <div class="stat">
+            <strong>终端优先</strong>
+            全流程交互
+          </div>
+          <div class="stat">
+            <strong>可扩展</strong>
+            Skills + MCP
+          </div>
+        </div>
+      </header>
+
+      <section>
+        <h2>核心能力</h2>
+        <p class="section-intro">围绕真实开发场景设计，而不是只做聊天窗口。</p>
+        <div class="grid">
+          <article class="card">
+            <h3>多步工具执行</h3>
+            <p>在单轮中串联 list/read/edit/run 等操作，完成从理解到落地的完整闭环。</p>
+          </article>
+          <article class="card">
+            <h3>审批后写入</h3>
+            <p>文件改动先展示 unified diff，再决定是否落盘，控制力与安全性并存。</p>
+          </article>
+          <article class="card">
+            <h3>终端体验优化</h3>
+            <p>支持 transcript 滚动、输入历史、slash 菜单、审批反馈，交互流畅且可追溯。</p>
+          </article>
+          <article class="card">
+            <h3>Skills 发现</h3>
+            <p>通过 `SKILL.md` 自动发现本地技能，让能力模块化、可复用、可共享。</p>
+          </article>
+          <article class="card">
+            <h3>MCP 工具接入</h3>
+            <p>支持通过 stdio 动态加载 MCP 服务，并可读取 resources 与 prompts。</p>
+          </article>
+          <article class="card">
+            <h3>兼容 Anthropic 风格接口</h3>
+            <p>保留通用配置方式，适应不同模型与环境，便于本地和团队统一部署。</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>工作流一眼看懂</h2>
+        <p class="section-intro">MiniCode 的核心是一个清晰、可解释、可扩展的 agent loop。</p>
+        <div class="workflow">
+          <div class="step"><strong>1.</strong> 接收用户需求并解析目标</div>
+          <div class="step"><strong>2.</strong> 检查工作区并按需调用工具</div>
+          <div class="step"><strong>3.</strong> 输出变更 diff 并等待审批</div>
+          <div class="step"><strong>4.</strong> 执行写入并在同一终端返回结果</div>
+        </div>
+      </section>
+
+      <section>
+        <h2>适合谁用</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>学习者</h3>
+            <p>想理解 Claude Code 类架构，但不希望从复杂工程入手。</p>
+          </article>
+          <article class="card">
+            <h3>研发团队</h3>
+            <p>需要可控、可审阅、可扩展的本地 AI 编码流程。</p>
+          </article>
+          <article class="card">
+            <h3>工具开发者</h3>
+            <p>希望在现有 agent loop 基础上快速加工具、改交互、做实验。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div>
+          <h2>3 分钟开始体验</h2>
+          <p>安装依赖后运行 `npm run install-local`，再执行 `minicode` 即可进入终端工作流。</p>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/LiuMengxuan04/MiniCode/blob/main/README.zh-CN.md">查看安装步骤</a>
+      </section>
+
+      <footer>MiniCode Product Page · Built for terminal-native builders.</footer>
+    </div>
+  </body>
+</html>
