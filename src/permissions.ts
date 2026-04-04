@@ -22,6 +22,10 @@ export type PermissionPromptResult = {
   feedback?: string
 }
 
+type EnsureCommandOptions = {
+  forcePromptReason?: string
+}
+
 export type PermissionRequest = {
   kind: 'path' | 'command' | 'edit'
   summary: string
@@ -336,12 +340,14 @@ export class PermissionManager {
     command: string,
     args: string[],
     commandCwd: string,
+    options?: EnsureCommandOptions,
   ): Promise<void> {
     await this.ready
 
     await this.ensurePathAccess(commandCwd, 'command_cwd')
 
-    const reason = classifyDangerousCommand(command, args)
+    const dangerousReason = classifyDangerousCommand(command, args)
+    const reason = options?.forcePromptReason?.trim() || dangerousReason
     if (!reason) {
       return
     }
@@ -369,7 +375,9 @@ export class PermissionManager {
 
     const promptResult = await this.prompt({
       kind: 'command',
-      summary: 'mini-code wants to run a dangerous command',
+      summary: options?.forcePromptReason
+        ? 'mini-code wants approval for this command'
+        : 'mini-code wants to run a dangerous command',
       details: [
         `cwd: ${commandCwd}`,
         `command: ${signature}`,
