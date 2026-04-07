@@ -40,7 +40,7 @@ The project is intentionally compact, so the control flow, tool model, and TUI b
 
 - TypeScript (this repo): [MiniCode](https://github.com/LiuMengxuan04/MiniCode)
 - Rust version: [MiniCode-rs (latest)](https://github.com/harkerhand/MiniCode-rs/tree/master)
-- Python version: coming soon
+- Python version: [MiniCode-Python](https://github.com/QUSETIONS/MiniCode-Python)
 
 ## Table of Contents
 
